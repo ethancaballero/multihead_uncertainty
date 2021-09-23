@@ -188,6 +188,9 @@ def get_multitask_experiment(name, scenario, tasks, data_dir="./datasets", only_
             # prepare train and test datasets with all classes
             mnist_train = get_dataset('mnist28', type="train", dir=data_dir, target_transform=target_transform,
                                       verbose=verbose)
+            train_size = int(0.8 * len(mnist_train))
+            valid_size = len(mnist_train) - train_size
+            mnist_train, mnist_valid = torch.utils.data.random_split(mnist_train, [train_size, valid_size])
             mnist_test = get_dataset('mnist28', type="test", dir=data_dir, target_transform=target_transform,
                                      verbose=verbose)
             # generate labels-per-task
@@ -196,12 +199,14 @@ def get_multitask_experiment(name, scenario, tasks, data_dir="./datasets", only_
             ]
             # split them up into sub-tasks
             train_datasets = []
+            valid_datasets = []
             test_datasets = []
             for labels in labels_per_task:
                 target_transform = transforms.Lambda(
                     lambda y, x=labels[0]: y - x
                 ) if scenario == 'domain' else None
                 train_datasets.append(SubDataset(mnist_train, labels, target_transform=target_transform))
+                valid_datasets.append(SubDataset(mnist_valid, labels, target_transform=target_transform))
                 test_datasets.append(SubDataset(mnist_test, labels, target_transform=target_transform))
     else:
         raise RuntimeError('Given undefined experiment: {}'.format(name))
@@ -210,5 +215,5 @@ def get_multitask_experiment(name, scenario, tasks, data_dir="./datasets", only_
     config['classes'] = classes_per_task if scenario == 'domain' else classes_per_task * tasks
 
     # Return tuple of train-, validation- and test-dataset, config-dictionary and number of classes per task
-    return config if only_config else ((train_datasets, test_datasets), config, classes_per_task)
+    return config if only_config else ((train_datasets, valid_datasets, test_datasets), config, classes_per_task)
 

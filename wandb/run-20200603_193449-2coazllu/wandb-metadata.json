@@ -1,0 +1,26 @@
+{
+    "root": "/Users/oleksostapenko/Projects/multihead_uncertainty",
+    "program": "<python with no main file>",
+    "git": {
+        "remote": "https://github.com/oleksost/multihead_uncertainty.git",
+        "commit": "2ebcb5a2f019586ba6045dbf0e2c8f6b731fcdea"
+    },
+    "email": "oleks.ostapenko@icloud.com",
+    "startedAt": "2020-06-03T19:32:54.880864",
+    "host": "Oleksiys-MacBook-Pro.local",
+    "username": "oleksostapenko",
+    "executable": "/Users/oleksostapenko/opt/anaconda3/envs/falr/bin/python",
+    "os": "macOS-10.14.6-x86_64-i386-64bit",
+    "python": "3.8.2",
+    "cpu_count": 4,
+    "args": [
+        "-f",
+        "/Users/oleksostapenko/Library/Jupyter/runtime/kernel-fbf37389-f3f4-47a4-b10e-08ad2d85685f.json"
+    ],
+    "state": "running",
+    "jobType": null,
+    "mode": "run",
+    "name": "run",
+    "project": "Growing Net",
+    "heartbeatAt": "2020-06-03T19:35:09.291316"
+}
