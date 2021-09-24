@@ -1,9 +1,9 @@
 import os
 import time
 
-runs = 5
+runs = 3
 run_counter = 0
-for h_size in [10,100,1000,10000,100000]:
+for h_size in [10,100,1000,10000,100000,1000000,10000000]:
     for run in range(runs):
         cwd = os.getcwd()
         #command = "python /network/home/ostapeno/dev/multi_head/run_growing_net.py \
