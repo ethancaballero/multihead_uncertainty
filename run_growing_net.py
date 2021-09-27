@@ -128,7 +128,7 @@ config = easydict.EasyDict({
     'lr': 0.001,
     'epochs': 40,
     'n_runs':3,
-    'seed':np.random.randint(10000),
+    'seed':np.random.randint(10000000000000),
     #'lr_factor': 0.1,
     #lr_min=0.00001
     #LR_PATIENCE = 3
