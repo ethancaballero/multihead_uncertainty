@@ -10,6 +10,9 @@ import torch.nn.functional as F
 from tqdm import tqdm as tqdm
 from utils.dataloaders import splitmnist as dataloader
 
+def str2bool(v):
+  return v.lower() in ("yes", "true", "t", "1")
+
 LR = 0.01
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 LOADER_KWARGS = {'num_workers': 1, 'pin_memory': True} if torch.cuda.is_available() else {}
@@ -34,17 +37,26 @@ def set_seed(manualSeed):
     ######################################################
 
 class MLP(nn.Module):
-    def __init__(self, class_numb, h_hidden):
+    def __init__(self, args):
         super().__init__()
-        self.class_numb = class_numb
+        self.args = args
+        h_hidden = args.h_size
         self.h_hidden = h_hidden
+        if self.args.multi_head:
+            self.class_numb = 5
+            self.out = nn.ModuleList([nn.Linear(self.h_hidden, self.class_numb), nn.Linear(self.h_hidden, self.class_numb)])
+        else:
+            self.class_numb = 10
+            self.out = nn.Linear(self.h_hidden, self.class_numb)
         self.layer_in = nn.Linear(28 * 28, h_hidden)
-        self.out = nn.ModuleList([nn.Linear(self.h_hidden, self.class_numb), nn.Linear(self.h_hidden, self.class_numb)])
 
     def forward(self, x, task):
         x = x.view(-1, 28 * 28)
         x = F.relu(self.layer_in(x))
-        output = self.out[task](x)
+        if self.args.multi_head:
+            output = self.out[task](x)
+        else:
+            output = self.out(x)
         return output
 
 
@@ -128,21 +140,25 @@ config = easydict.EasyDict({
     'lr': 0.001,
     'epochs': 40,
     'n_runs':3,
-    'seed':np.random.randint(10000000000000),
+    'seed':np.random.randint(4294967290),
     #'lr_factor': 0.1,
     #lr_min=0.00001
     #LR_PATIENCE = 3
 })
 
 
-def main(h_hidden):
+def main(args):
+    h_hidden = args.h_size
+    config.update({'h_size': args.h_size,
+                   'multi_head': args.multi_head,
+    })
     #for h_hidden in [10, 100, 1000, 10000, 100000, 1000000]: #, 10000000]:
     #for run in range(config.n_runs):
     best_acc = 0
     accs = []
     set_seed(config.seed)
     best_model = None
-    net = MLP(5, h_hidden).to(DEVICE)
+    net = MLP(args).to(DEVICE)
     optimizer = _get_optimizer(net, config.lr)
     wandb_init(net, f'hs_{h_hidden}', 'run', config)
     try:
@@ -170,5 +186,6 @@ def main(h_hidden):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--h_size', default=10, type=int, help='hidden size')
+    parser.add_argument('--multi_head', type=str2bool, default=True)
     prs = parser.parse_args()
-    main(prs.h_size)
+    main(prs)

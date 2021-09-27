@@ -9,7 +9,7 @@ for h_size in [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384
     for run in range(runs):
         cwd = os.getcwd()
         #command = "python /network/home/ostapeno/dev/multi_head/run_growing_net.py \
-        command = "python run_growing_net.py --multi_head True \
+        command = "python run_growing_net.py --multi_head False \
         --h_size %(h_size)s \
                   " % locals()
         print(command)
