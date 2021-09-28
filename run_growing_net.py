@@ -60,9 +60,11 @@ class MLP(nn.Module):
         return output
 
 
-def train(net, optimizer, epoch, train_loader, task):
+def train(args, net, optimizer, epoch, train_loader, task):
     net.train()
     for batch_idx, (data, target) in enumerate(tqdm(train_loader)):
+        if (task == 1) and (args.multi_head == False) and (args.new_bins == True):
+            target = target + 5
         data, target = data.to(DEVICE), target.to(DEVICE)
         net.zero_grad()
         out = net(data, task)
@@ -71,7 +73,7 @@ def train(net, optimizer, epoch, train_loader, task):
         optimizer.step()
 
 
-def test(net, n_tasks, datasets, current_task=None, split="test"):
+def test(args, net, n_tasks, datasets, current_task=None, split="test"):
     net.eval()
     correct = 0
     test_loss = 0
@@ -82,6 +84,8 @@ def test(net, n_tasks, datasets, current_task=None, split="test"):
             with torch.no_grad():
                 loader = torch.utils.data.DataLoader(datasets[task], batch_size=64)
                 for data, target in loader:
+                    if (task == 1) and (args.multi_head == False) and (args.new_bins == True):
+                        target = target + 5
                     data, target = data.to(DEVICE), target.to(DEVICE)
                     output = net(data, task)
                     pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
@@ -101,6 +105,8 @@ def test(net, n_tasks, datasets, current_task=None, split="test"):
         with torch.no_grad():
             loader = torch.utils.data.DataLoader(datasets[current_task], batch_size=64)
             for data, target in loader:
+                if (task == 1) and (args.multi_head == False) and (args.new_bins == True):
+                    target = target + 5
                 data, target = data.to(DEVICE), target.to(DEVICE)
                 output = net(data, task)
                 pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
@@ -167,14 +173,14 @@ def main(args):
             train_loader = torch.utils.data.DataLoader(train_datasets[task], batch_size=64)
             for epoch in range(config.epochs):
                 print("Epoch: " + str(epoch))
-                train(net, optimizer, epoch, train_loader, task)
-                valid_acc = test(net, 2, valid_datasets, current_task=task, split="valid")
+                train(args, net, optimizer, epoch, train_loader, task)
+                valid_acc = test(args, net, 2, valid_datasets, current_task=task, split="valid")
 
                 if valid_acc > best_acc:
                     best_acc = valid_acc
                     best_model = get_model(net)
             set_model_(net, best_model)
-            acc_av = test(net, task + 1, test_datasets, current_task=None, split="test")
+            acc_av = test(args, net, task + 1, test_datasets, current_task=None, split="test")
             accs.append(acc_av)
     except KeyboardInterrupt:
         pass
@@ -187,5 +193,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--h_size', default=10, type=int, help='hidden size')
     parser.add_argument('--multi_head', type=str2bool, default=True)
+    parser.add_argument('--new_bins', type=str2bool, default=True)
     prs = parser.parse_args()
     main(prs)
