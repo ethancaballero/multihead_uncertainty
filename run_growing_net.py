@@ -157,6 +157,7 @@ def main(args):
     h_hidden = args.h_size
     config.update({'h_size': args.h_size,
                    'multi_head': args.multi_head,
+                   'new_bins': args.new_bins,
     })
     #for h_hidden in [10, 100, 1000, 10000, 100000, 1000000]: #, 10000000]:
     #for run in range(config.n_runs):
